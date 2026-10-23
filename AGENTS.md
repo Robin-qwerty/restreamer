@@ -67,8 +67,11 @@ There are no tests or linters; verify changes by building the image and opening 
   generated from `metadata.layout`.
 - `.github/workflows/build_custom.yaml` builds the UI fork and the bundle and pushes them to GHCR
   (`ghcr.io/robin-qwerty/restreamer:<variant>-latest`) on GitHub-hosted runners.
-- `docker-compose.yml` runs the CUDA image with the NVIDIA runtime.
-- User guide: `docs/vertical-setup.md`.
+- `scripts/build-local.sh [cuda|cuda-ffmpeg8|default] [path-to-restreamer-ui]` builds the UI and the
+  bundle on the machine itself (`restreamer:<variant>-local`), with the same core/FFmpeg tags as the workflow.
+- `docker-compose.yml` runs the image with the NVIDIA runtime. Image, port bindings and volume paths
+  come from `.env` (see `.env.example`). Restreamer settings themselves are made in the UI.
+- User guide: `docs/vertical-setup.md`. Setup prompt for an AI agent on a new server: `docs/new-server-prompt.md`.
 
 ## Conventions
 

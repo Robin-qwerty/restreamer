@@ -13,7 +13,23 @@ The horizontal channel can stay in passthrough, so it costs almost nothing.
 
 UI code: [Robin-qwerty/restreamer-ui](https://github.com/Robin-qwerty/restreamer-ui).
 
+Setting up a new server with an AI agent? [`new-server-prompt.md`](new-server-prompt.md) is a
+ready-to-paste prompt with every step below, including a reverse proxy for servers whose ports 80/443
+are already in use, and a performance checklist for OBS and the server.
+
 ## 1. Build the image
+
+**On the server (recommended):** clone both repositories next to each other and run the build script:
+
+```sh
+git clone -b 2.x  https://github.com/Robin-qwerty/restreamer.git
+git clone -b main https://github.com/Robin-qwerty/restreamer-ui.git
+cd restreamer && scripts/build-local.sh cuda ../restreamer-ui
+```
+
+This builds `restreamer:cuda-local`. Variants: `cuda`, `cuda-ffmpeg8` and `default` (see below).
+
+**Or with GitHub Actions (GHCR):**
 
 1. In this repository on GitHub, open **Actions** → **Build custom image (GHCR)** → **Run workflow**.
    - `ui_ref`: the branch of the UI fork to build (`main`, or a feature branch).
@@ -52,7 +68,12 @@ sudo docker run --rm --gpus all ubuntu nvidia-smi
 
 ## 3. Start Restreamer
 
-Copy `docker-compose.yml` from this repository to the server, then:
+Copy `docker-compose.yml` and `.env.example` (as `.env`) from this repository to a folder on the server.
+In `.env`:
+- Set `RESTREAMER_IMAGE`: `restreamer:cuda-local` from the build script, or the GHCR image.
+- Adjust the ports if needed. For example, `RESTREAMER_HTTP=127.0.0.1:8080` keeps the UI off the network when a reverse proxy (nginx, Apache, Caddy) serves it under your domain.
+
+Then:
 
 ```sh
 sudo docker compose up -d
