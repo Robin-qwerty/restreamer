@@ -1,0 +1,102 @@
+name: 'Build custom image (GHCR)'
+
+# Builds the UI from the Robin-qwerty/restreamer-ui fork and bundles it with the
+# datarhei core and FFmpeg images. Runs on GitHub-hosted runners and pushes to
+# GitHub Container Registry, so no self-hosted runner or Docker Hub account is needed.
+
+on:
+    workflow_dispatch:
+        inputs:
+            ui_ref:
+                description: 'Branch, tag or commit of Robin-qwerty/restreamer-ui'
+                required: true
+                default: 'main'
+            variant:
+                description: 'Image variant'
+                required: true
+                default: 'cuda'
+                type: choice
+                options:
+                    - cuda
+                    - cuda-ffmpeg8
+                    - default
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
+            - name: Checkout restreamer-ui fork
+              uses: actions/checkout@v5
+              with:
+                  repository: Robin-qwerty/restreamer-ui
+                  ref: ${{ inputs.ui_ref }}
+                  path: ./ui
+
+            - name: Select base images
+              id: images
+              run: |
+                  owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+                  echo "registry=ghcr.io/${owner}" >> "$GITHUB_OUTPUT"
+                  echo "uisha=$(git -C ./ui rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+                  case "${{ inputs.variant }}" in
+                    cuda)
+                      # same combination as the official cuda-latest image (needs NVIDIA driver >= 515)
+                      echo "core=datarhei/base:core16.16.0-ubuntu22.04" >> "$GITHUB_OUTPUT"
+                      echo "ffmpeg=datarhei/base:ffmpeg6.1.1-cuda-ubuntu22.04-cuda11.7.1" >> "$GITHUB_OUTPUT"
+                      echo "prefix=cuda-" >> "$GITHUB_OUTPUT"
+                      ;;
+                    cuda-ffmpeg8)
+                      # newer FFmpeg with the core dev build (needs NVIDIA driver >= 570)
+                      echo "core=datarhei/base:core-dev-ubuntu24.04" >> "$GITHUB_OUTPUT"
+                      echo "ffmpeg=datarhei/base:ffmpeg8.1.2-cuda-ubuntu24.04-cuda12.9.1" >> "$GITHUB_OUTPUT"
+                      echo "prefix=cuda-ffmpeg8-" >> "$GITHUB_OUTPUT"
+                      ;;
+                    *)
+                      echo "core=datarhei/base:core16.16.0-alpine3.20" >> "$GITHUB_OUTPUT"
+                      echo "ffmpeg=datarhei/base:ffmpeg6.1.1-alpine3.20" >> "$GITHUB_OUTPUT"
+                      echo "prefix=" >> "$GITHUB_OUTPUT"
+                      ;;
+                  esac
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Login to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build UI
+              uses: docker/build-push-action@v6
+              with:
+                  context: ./ui
+                  file: ./ui/Dockerfile
+                  platforms: linux/amd64
+                  push: true
+                  tags: |
+                      ${{ steps.images.outputs.registry }}/restreamer-ui:${{ steps.images.outputs.uisha }}
+                      ${{ steps.images.outputs.registry }}/restreamer-ui:latest
+
+            - name: Build bundle
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  platforms: linux/amd64
+                  build-args: |
+                      RESTREAMER_UI_IMAGE=${{ steps.images.outputs.registry }}/restreamer-ui:${{ steps.images.outputs.uisha }}
+                      CORE_IMAGE=${{ steps.images.outputs.core }}
+                      FFMPEG_IMAGE=${{ steps.images.outputs.ffmpeg }}
+                  push: true
+                  tags: |
+                      ${{ steps.images.outputs.registry }}/restreamer:${{ steps.images.outputs.prefix }}latest
+                      ${{ steps.images.outputs.registry }}/restreamer:${{ steps.images.outputs.prefix }}ui-${{ steps.images.outputs.uisha }}

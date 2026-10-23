@@ -55,6 +55,18 @@ docker run -d --name restreamer -p 8080:8080 -p 8181:8181 -p 1935:1935 -p 1936:1
 
 There are no tests or linters; verify changes by building the image and opening http://localhost:8080/ui.
 
+## This fork
+
+- UI fork: https://github.com/Robin-qwerty/restreamer-ui. It adds the vertical layout editor
+  (`src/views/Layout`, `src/misc/layout`) and the dual view (`src/views/Pair`).
+- A vertical channel is a normal ingest process. Its input is the source channel's internal
+  stream (`{rtmp,name=<id>.stream}` or `{memfs}/<id>.m3u8`), and its ffmpeg `-filter_complex` is
+  generated from `metadata.layout`.
+- `.github/workflows/build_custom.yaml` builds the UI fork and the bundle and pushes them to GHCR
+  (`ghcr.io/robin-qwerty/restreamer:<variant>-latest`) on GitHub-hosted runners.
+- `docker-compose.yml` runs the CUDA image with the NVIDIA runtime.
+- User guide: `docs/vertical-setup.md`.
+
 ## Conventions
 
 - Keep `run.sh` POSIX `sh` (Alpine/busybox).
