@@ -46,7 +46,7 @@ docker build -t restreamer:local .
 docker build \
   --build-arg RESTREAMER_UI_IMAGE=datarhei/restreamer-ui:dev \
   --build-arg CORE_IMAGE=datarhei/base:core-dev-alpine3.23 \
-  --build-arg FFMPEG_IMAGE=datarhei/base:ffmpeg8.1.1-alpine3.23 \
+  --build-arg FFMPEG_IMAGE=datarhei/base:ffmpeg8.1.2-alpine3.23 \
   -t restreamer:local .
 
 docker run -d --name restreamer -p 8080:8080 -p 8181:8181 -p 1935:1935 -p 1936:1936 -p 6000:6000/udp \

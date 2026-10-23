@@ -17,12 +17,12 @@ jobs:
                 include:
                     - ui: dev
                       core: core-dev-alpine3.23
-                      ffmpeg: ffmpeg8.1.1-alpine3.23
+                      ffmpeg: ffmpeg8.1.2-alpine3.23
                       platforms: linux/amd64,linux/arm64,linux/arm/v7
                       name: dev
                     - ui: dev
                       core: core-dev-alpine3.23
-                      ffmpeg: ffmpeg8.1.1-rpi-alpine3.23
+                      ffmpeg: ffmpeg8.1.2-rpi-alpine3.23
                       platforms: linux/arm64,linux/arm/v7
                       name: rpi-dev
                     - ui: dev
@@ -32,7 +32,7 @@ jobs:
                       name: vaapi-dev
                     - ui: dev
                       core: core-dev-ubuntu24.04
-                      ffmpeg: ffmpeg8.1.1-cuda-ubuntu24.04-cuda12.9.1
+                      ffmpeg: ffmpeg8.1.2-cuda-ubuntu24.04-cuda12.9.1
                       platforms: linux/amd64
                       name: cuda-dev
         steps:
