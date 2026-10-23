@@ -16,7 +16,7 @@ jobs:
             coreversion: ${{ steps.core.outputs.version }}
         steps:
             - name: Checkout restreamr-ui repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
               with:
                   repository: datarhei/restreamer-ui
                   path: ./ui
@@ -28,7 +28,7 @@ jobs:
                   echo "bundle=$(cat ./ui/package.json | jq '.bundle' | sed 's/\"//g' | sed 's/restreamer-v//g' )" >> "$GITHUB_OUTPUT"
 
             - name: Checkout core repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
               with:
                   repository: datarhei/core
                   path: ./core
@@ -72,7 +72,7 @@ jobs:
                       prefix: cuda-
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Docker meta
               id: meta
@@ -86,13 +86,13 @@ jobs:
                       type=raw,value=${{ matrix.prefix }}latest
 
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@master
+              uses: docker/setup-qemu-action@v3
               with:
                   platforms: all
 
             - name: Set up Docker Buildx
               id: buildx
-              uses: docker/setup-buildx-action@master
+              uses: docker/setup-buildx-action@v3
 
             - name: Login to DockerHub
               if: github.event_name != 'pull_request'
@@ -102,7 +102,7 @@ jobs:
                   password: ${{ secrets.DOCKER_PASSWORD }}
 
             - name: Build Multi-Arch
-              uses: docker/build-push-action@v5
+              uses: docker/build-push-action@v6
               with:
                   builder: ${{ steps.buildx.outputs.name }}
                   context: .
