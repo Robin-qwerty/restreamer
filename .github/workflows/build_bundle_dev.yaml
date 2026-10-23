@@ -17,12 +17,12 @@ jobs:
                 include:
                     - ui: dev
                       core: core-dev-alpine3.23
-                      ffmpeg: ffmpeg8.1.1-alpine3.23
+                      ffmpeg: ffmpeg8.1.2-alpine3.23
                       platforms: linux/amd64,linux/arm64,linux/arm/v7
                       name: dev
                     - ui: dev
                       core: core-dev-alpine3.23
-                      ffmpeg: ffmpeg8.1.1-rpi-alpine3.23
+                      ffmpeg: ffmpeg8.1.2-rpi-alpine3.23
                       platforms: linux/arm64,linux/arm/v7
                       name: rpi-dev
                     - ui: dev
@@ -32,12 +32,12 @@ jobs:
                       name: vaapi-dev
                     - ui: dev
                       core: core-dev-ubuntu24.04
-                      ffmpeg: ffmpeg8.1.1-cuda-ubuntu24.04-cuda12.9.1
+                      ffmpeg: ffmpeg8.1.2-cuda-ubuntu24.04-cuda12.9.1
                       platforms: linux/amd64
                       name: cuda-dev
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Docker meta
               id: meta
@@ -49,13 +49,13 @@ jobs:
                       type=raw,value=${{ matrix.name }}
 
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@master
+              uses: docker/setup-qemu-action@v3
               with:
                   platforms: all
 
             - name: Set up Docker Buildx
               id: buildx
-              uses: docker/setup-buildx-action@master
+              uses: docker/setup-buildx-action@v3
 
             - name: Login to DockerHub
               if: github.event_name != 'pull_request'
@@ -65,7 +65,7 @@ jobs:
                   password: ${{ secrets.DOCKER_PASSWORD }}
 
             - name: Build Multi-Arch
-              uses: docker/build-push-action@v5
+              uses: docker/build-push-action@v6
               with:
                   builder: ${{ steps.buildx.outputs.name }}
                   context: .

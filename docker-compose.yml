@@ -1,0 +1,35 @@
+# Restreamer with NVIDIA GPU encoding.
+#
+# Requirements on the host: NVIDIA driver and the NVIDIA Container Toolkit
+# (see docs/vertical-setup.md). Settings can be changed in a .env file next to this
+# file (see .env.example). Start with: docker compose up -d
+# The UI is then at http://<server>:8080/ui
+
+services:
+    restreamer:
+        # scripts/build-local.sh builds restreamer:cuda-local on this machine
+        image: ${RESTREAMER_IMAGE:-ghcr.io/robin-qwerty/restreamer:cuda-latest}
+        container_name: restreamer
+        restart: unless-stopped
+        ports:
+            # Use e.g. RESTREAMER_HTTP=127.0.0.1:8080 to reach the UI only through a reverse proxy
+            - '${RESTREAMER_HTTP:-8080}:8080' # HTTP (UI, API, HLS)
+            - '${RESTREAMER_HTTPS:-8181}:8181' # HTTPS (only when TLS is enabled in the settings)
+            - '${RESTREAMER_RTMP:-1935}:1935' # RTMP (OBS on the same host uses localhost:1935)
+            - '${RESTREAMER_RTMPS:-1936}:1936' # RTMPS
+            - '${RESTREAMER_SRT:-6000}:6000/udp' # SRT
+        volumes:
+            - ${RESTREAMER_CONFIG_DIR:-./config}:/core/config
+            - ${RESTREAMER_DATA_DIR:-./data}:/core/data
+        environment:
+            # The vertical channel reads the horizontal one from the internal RTMP server (low delay)
+            CORE_RTMP_ENABLE: 'true'
+            NVIDIA_VISIBLE_DEVICES: all
+            NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: all
+                          capabilities: [gpu]
