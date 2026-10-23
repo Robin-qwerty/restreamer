@@ -57,8 +57,11 @@ There are no tests or linters; verify changes by building the image and opening 
 
 ## This fork
 
-- UI fork: https://github.com/Robin-qwerty/restreamer-ui. It adds the vertical layout editor
-  (`src/views/Layout`, `src/misc/layout`) and the dual view (`src/views/Pair`).
+- UI fork: https://github.com/Robin-qwerty/restreamer-ui. It adds:
+  - the vertical layout editor (`src/views/Layout`, `src/misc/layout`)
+  - the dual view (`src/views/Pair`)
+  - the status-sorted channel list on the right (`src/misc/ChannelList.js`, `src/utils/channelStatus.js`)
+  - the activity log panel (`src/views/Main/ActivityPanel.js`, `ActivityLog.js`, `src/utils/activity.js`)
 - A vertical channel is a normal ingest process. Its input is the source channel's internal
   stream (`{rtmp,name=<id>.stream}` or `{memfs}/<id>.m3u8`), and its ffmpeg `-filter_complex` is
   generated from `metadata.layout`.

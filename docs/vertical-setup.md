@@ -72,6 +72,20 @@ Open `http://<server>:8080/ui` and set up the admin login.
 4. Finish the wizard. Choose **passthrough** (copy) for video and audio unless you need re-encoding.
    For YouTube audio glitches, set the audio encoding on that publication (or in the channel) to AAC.
 
+### OBS on the same server (localhost)
+
+The address the wizard shows uses your public domain, e.g.
+`rtmps://restreamer.example.net:1936/<channel-id>.stream`. On the same machine you don't need the
+domain:
+
+- **Use plain RTMP:** `rtmp://localhost:1935/<channel-id>.stream` (or `127.0.0.1`).
+  - If you set an RTMP token in the settings, add it the same way the wizard shows it.
+  - The RTMP server on port 1935 stays on even when RTMPS is enabled.
+  - Nothing else needs to change: Restreamer only looks at the stream name (`<channel-id>.stream`), not at the host OBS connects to.
+- **`rtmps://localhost:1936/...` does not work.** The TLS certificate is issued for your domain, so OBS rejects the connection to `localhost`. Encryption isn't needed when the traffic never leaves the machine.
+- **Pulling a stream** that already runs on this server (for example another program's RTMP or SRT output): choose **Network source** and enter its address, e.g. `rtmp://127.0.0.1:1935/live/stream`.
+- **"Virtual source"** in the advanced setup is only a test-pattern generator (color bars and similar). It can't receive a stream, so it isn't needed for any of this.
+
 ## 5. Vertical channel
 
 1. On the horizontal channel's page click **Create vertical channel**.
@@ -99,6 +113,37 @@ The **Dual view** button on either channel's page opens both channels side by si
 - Typical setup:
   - Horizontal → YouTube, Twitch.
   - Vertical → TikTok, YouTube Shorts live, Instagram (via RTMP).
+
+## 7. Channel list and activity log
+
+### Channel list
+
+The camera button (top right) opens and closes the channel list on the right.
+
+- Channels are grouped and ordered by status:
+  - **green, Live:** a publication is streaming. A red warning sign on the dot means another publication of that channel is failing.
+  - **light purple, Receiving:** the input is there, nothing is published.
+  - **red, Problems:** the input is lost or waiting, or a publication is failing.
+  - **gray, Inactive:** the channel is stopped.
+- Hover over a dot to see the details.
+- The list uses one column while all channels fit on the screen, and two smaller columns otherwise. The fullscreen button shows all channels in a large grid.
+- Snapshots of channels with an input refresh every minute. Channels without input show a gray "No input" tile.
+
+### Activity log
+
+The **Activity** panel on the left of a channel page folds in and out with the arrow, or with the "Activity" tab on the left edge. It shows:
+
+- **Status:** the state of the input, uptime, bitrate, FPS and speed, and how many publications are live or failing.
+- **Input stability:**
+  - Stable / Some issues / Unstable, based on bitrate jumps, dropped frames, speed (real-time or not) and restarts in the last hour
+  - small graphs of bitrate and FPS for the last 5 minutes
+- **Events** of the channel and its publications:
+  - A failed attempt is one line, e.g. "Stopped: Connection refused ×4".
+  - Click an event for an explanation, a tip, and the original FFmpeg message.
+  - Filter with *All / Problems / Publications*.
+- **Raw logs:** *Raw process log* and *Process report* open the original logs.
+
+On the dual page, the panel can show both channels in one **combined** log (the default), **side by side**, or only one of them. The panel remembers whether it was open.
 
 ## Troubleshooting
 
